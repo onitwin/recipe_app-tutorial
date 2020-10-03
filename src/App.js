@@ -1,21 +1,25 @@
 import React,{useEffect,useState} from 'react';
 import './App.css';
+import Recipe from "./Recipe"
 
 const App=() =>{
   
-
+  const [recipes,setRecipes]=useState([]);
+  const [search,setSearch]=useState("");
+  const [query,setQuery]=useState("")
 
 
 
   useEffect(()=>{
     getRecipes()
 
-  },[]) //empty array means only runs once, no array refreshes each time. alternatively add what you want to track.
+  },[query]) //empty array means only runs once, no array refreshes each time. alternatively add what you want to track.
 
   const getRecipes= async()=>{
-    const response =await fetch(`https:api.edamam.com/search?q=chicken&app_id=${APP_ID}&app_key=${APP_KEY}`)
+    const response =await fetch(`https:api.edamam.com/search?q=${query}&app_id=${APP_ID}&app_key=${APP_KEY}`)
     const data= await response.json()
-    console.log(data)
+    setRecipes(data.hits)
+    console.log(data.hits)
 
   }
 
@@ -24,14 +28,29 @@ const App=() =>{
   // .then(response =>{response.json()})
  // .then (array.push(response))
 
+ const updateSearch=e=>{
+   setSearch(e.target.value)
+ }
+
+ const getSearch=e=>{
+   e.preventDefault();
+   setQuery(search)
+   setSearch("")
+ }
+
 
 
   return (
     <div className="App">
-      <form className='search-form' >
-        <input className="search-bar" type="text"></input>
+      <form  onSubmit={getSearch} className='search-form' >
+        <input className="search-bar" type="text" value={search} onChange={updateSearch}></input>
         <button  className="search-button" type="submit">submit</button>
       </form>
+      <div className="recipes">
+      {recipes.map(recipe=>(
+        <Recipe  key={recipe.recipe.label} link={recipe.recipe.url} ingredients={recipe.recipe.ingredients} title={recipe.recipe.label} calories={recipe.recipe.calories} image={recipe.recipe.image}/>
+      ))}
+      </div>
     </div>
   );
 }
